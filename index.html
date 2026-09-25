@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dan Code</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+ margin:0;
+ background:#111827;
+ color:white;
+ font-family:Arial,sans-serif;
+ height:100vh;
+ overflow:hidden
+}
+
+header{
+ height:55px;
+ background:#0b1220;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ padding:0 12px
+}
+
+.logo{
+ font-size:19px;
+ font-weight:bold
+}
+
+.actions button{
+ border:0;
+ background:#2563eb;
+ color:white;
+ padding:9px 10px;
+ border-radius:7px;
+ margin-left:4px
+}
+
+.tabs{
+ display:flex;
+ background:#182235
+}
+
+.tabs button{
+ flex:1;
+ padding:12px;
+ border:0;
+ background:#182235;
+ color:#aaa;
+ font-weight:bold
+}
+
+.tabs button.active{
+ background:#2563eb;
+ color:white
+}
+
+.editor{
+ height:45vh
+}
+
+textarea{
+ display:none;
+ width:100%;
+ height:100%;
+ resize:none;
+ outline:none;
+ border:0;
+ padding:15px;
+ background:#0d1117;
+ color:#e6edf3;
+ font:15px monospace;
+ line-height:1.6
+}
+
+textarea.active{
+ display:block
+}
+
+.bottom{
+ height:45vh;
+ background:white
+}
+
+.preview-title{
+ height:40px;
+ background:#182235;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ padding:0 12px
+}
+
+#preview{
+ width:100%;
+ height:calc(100% - 40px);
+ border:0
+}
+
+.run{
+ position:fixed;
+ right:15px;
+ bottom:15px;
+ width:60px;
+ height:60px;
+ border-radius:50%;
+ border:0;
+ background:#22c55e;
+ color:white;
+ font-size:24px;
+ box-shadow:0 5px 20px #0008
+}
+</style>
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">⚡ DAN CODE</div>
+
+<div class="actions">
+<button onclick="saveCode()">💾</button>
+<button onclick="downloadFolder()">📦</button>
+<button onclick="clearCode()">🗑️</button>
+</div>
+
+</header>
+
+<div class="tabs">
+
+<button class="active"
+onclick="showTab('html',this)">HTML</button>
+
+<button onclick="showTab('css',this)">CSS</button>
+
+<button onclick="showTab('js',this)">JS</button>
+
+</div>
+
+<div class="editor">
+
+<textarea id="html"
+class="active"
+spellcheck="false"><!DOCTYPE html>
+<html>
+<head>
+<title>My Website</title>
+</head>
+<body>
+
+<h1>Hello World 👋</h1>
+<p>Welcome to Dan Code.</p>
+
+<button onclick="hello()">Click Me</button>
+
+</body>
+</html></textarea>
+
+<textarea id="css"
+spellcheck="false">body{
+font-family:Arial;
+text-align:center;
+padding:40px;
+background:#f1f5f9;
+}
+
+h1{
+color:#2563eb;
+}
+
+button{
+padding:12px 20px;
+border:0;
+border-radius:8px;
+background:#2563eb;
+color:white;
+}</textarea>
+
+<textarea id="js"
+spellcheck="false">function hello(){
+alert("Hello from Dan Code!");
+}</textarea>
+
+</div>
+
+<div class="bottom">
+
+<div class="preview-title">
+<span>🌐 Live Preview</span>
+<span id="status">Ready</span>
+</div>
+
+<iframe id="preview"></iframe>
+
+</div>
+
+<button class="run" onclick="runCode()">▶</button>
+
+<script>
+
+const html=document.getElementById("html");
+const css=document.getElementById("css");
+const js=document.getElementById("js");
+const preview=document.getElementById("preview");
+const status=document.getElementById("status");
+
+
+/* =========================
+   LIVE PREVIEW
+========================= */
+
+function runCode(){
+
+let code=`
+${html.value}
+
+<style>
+${css.value}
+</style>
+
+<script>
+${js.value}
+<\/script>
+`;
+
+preview.srcdoc=code;
+
+status.textContent="Live ✓";
+
+saveLocal();
+}
+
+
+/* =========================
+   TABS
+========================= */
+
+function showTab(tab,button){
+
+document.querySelectorAll("textarea")
+.forEach(x=>x.classList.remove("active"));
+
+document.querySelectorAll(".tabs button")
+.forEach(x=>x.classList.remove("active"));
+
+document.getElementById(tab)
+.classList.add("active");
+
+button.classList.add("active");
+}
+
+
+/* =========================
+   SAVE
+========================= */
+
+function saveLocal(){
+
+localStorage.setItem(
+"dan_html",
+html.value
+);
+
+localStorage.setItem(
+"dan_css",
+css.value
+);
+
+localStorage.setItem(
+"dan_js",
+js.value
+);
+}
+
+
+function saveCode(){
+
+saveLocal();
+
+status.textContent="Saved ✓";
+
+setTimeout(()=>{
+status.textContent="Live ✓";
+},1000);
+}
+
+
+/* =========================
+   LOAD
+========================= */
+
+function loadCode(){
+
+let h=localStorage.getItem("dan_html");
+let c=localStorage.getItem("dan_css");
+let j=localStorage.getItem("dan_js");
+
+if(h)html.value=h;
+if(c)css.value=c;
+if(j)js.value=j;
+}
+
+
+/* =========================
+   CLEAR
+========================= */
+
+function clearCode(){
+
+if(confirm("Clear all code?")){
+
+html.value="";
+css.value="";
+js.value="";
+
+localStorage.removeItem("dan_html");
+localStorage.removeItem("dan_css");
+localStorage.removeItem("dan_js");
+
+runCode();
+}
+}
+
+
+/* =========================
+   AUTO CLOSE HTML TAGS
+========================= */
+
+const voidTags=[
+"area","base","br","col","embed",
+"hr","img","input","link","meta",
+"param","source","track","wbr"
+];
+
+html.addEventListener("keydown",function(e){
+
+if(e.key!==" "){
+
+if(e.key===">"){
+
+let pos=this.selectionStart;
+
+let before=this.value.substring(0,pos);
+
+let match=before.match(
+/<([a-zA-Z][a-zA-Z0-9]*)([^<>]*)>$/
+);
+
+if(match){
+
+let tag=match[1].toLowerCase();
+
+if(!voidTags.includes(tag)){
+
+let close="</"+tag+">";
+
+this.value=
+this.value.substring(0,pos)
++close
++this.value.substring(pos);
+
+this.selectionStart=
+this.selectionEnd=pos;
+
+setTimeout(runCode,0);
+
+}
+}
+}
+
+}
+
+
+/* =========================
+   AUTO CLOSE QUOTES
+========================= */
+
+if(e.key==='"'){
+
+let pos=this.selectionStart;
+
+let next=this.value.charAt(pos);
+
+if(next==='"'){
+
+e.preventDefault();
+
+this.selectionStart=
+this.selectionEnd=pos+1;
+
+}
+
+}
+
+});
+
+
+/* =========================
+   AUTO CLOSE BRACKETS
+========================= */
+
+html.addEventListener("keydown",function(e){
+
+let pairs={
+"(":")",
+"[":"]",
+"{":"}"
+};
+
+if(pairs[e.key]){
+
+let pos=this.selectionStart;
+
+this.value=
+this.value.substring(0,pos)
++pairs[e.key]
++this.value.substring(pos);
+
+this.selectionStart=
+this.selectionEnd=pos;
+
+e.preventDefault();
+
+}
+
+});
+
+
+/* =========================
+   ZIP CREATOR
+========================= */
+
+function crc32(data){
+
+let table=[];
+
+for(let n=0;n<256;n++){
+
+let c=n;
+
+for(let k=0;k<8;k++)
+
+c=(c&1)
+?0xEDB88320^(c>>>1)
+:c>>>1;
+
+table[n]=c;
+}
+
+let crc=0xffffffff;
+
+for(let i=0;i<data.length;i++)
+
+crc=
+table[(crc^data[i])&255]
+^(crc>>>8);
+
+return(crc^0xffffffff)>>>0;
+}
+
+
+function write32(arr,n){
+
+arr.push(
+n&255,
+(n>>>8)&255,
+(n>>>16)&255,
+(n>>>24)&255
+);
+
+}
+
+
+function createZip(files){
+
+let output=[];
+let central=[];
+let offset=0;
+
+files.forEach(file=>{
+
+let name=
+new TextEncoder().encode(file.name);
+
+let data=
+new TextEncoder().encode(file.data);
+
+let crc=crc32(data);
+
+let local=[
+0x50,0x4b,0x03,0x04,
+20,0,0,0,
+0,0,0,0,
+0,0,0,0
+];
+
+write32(local,crc);
+write32(local,data.length);
+write32(local,data.length);
+
+local.push(
+name.length&255,
+(name.length>>>8)&255,
+0,0
+);
+
+output.push(...local);
+output.push(...name);
+output.push(...data);
+
+
+let c=[
+0x50,0x4b,0x01,0x02,
+20,0,
+20,0,
+0,0,0,0,
+0,0,0,0
+];
+
+write32(c,crc);
+write32(c,data.length);
+write32(c,data.length);
+
+c.push(
+name.length&255,
+(name.length>>>8)&255,
+0,0,
+0,0,
+0,0
+);
+
+write32(c,0);
+write32(c,offset);
+
+c.push(...name);
+
+central.push(...c);
+
+offset=output.length;
+
+});
+
+let centralOffset=output.length;
+
+output.push(...central);
+
+let centralSize=
+output.length-centralOffset;
+
+let end=[
+0x50,0x4b,0x05,0x06,
+0,0,0,0,
+files.length&255,
+(files.length>>>8)&255,
+files.length&255,
+(files.length>>>8)&255
+];
+
+write32(end,centralSize);
+write32(end,centralOffset);
+
+end.push(0,0,0,0);
+
+output.push(...end);
+
+return new Uint8Array(output);
+}
+
+
+/* =========================
+   DOWNLOAD PROJECT
+========================= */
+
+function downloadFolder(){
+
+let files=[
+
+{
+name:"dan-code-project/index.html",
+
+data:`<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width,initial-scale=1">
+
+<title>My Website</title>
+
+<link rel="stylesheet"
+href="style.css">
+
+</head>
+
+<body>
+
+${html.value}
+
+<script src="script.js"><\/script>
+
+</body>
+</html>`
+},
+
+{
+name:"dan-code-project/style.css",
+data:css.value
+},
+
+{
+name:"dan-code-project/script.js",
+data:js.value
+}
+
+];
+
+let zip=createZip(files);
+
+let blob=new Blob([zip],{
+type:"application/zip"
+});
+
+let url=
+URL.createObjectURL(blob);
+
+let a=document.createElement("a");
+
+a.href=url;
+
+a.download=
+"dan-code-project.zip";
+
+document.body.appendChild(a);
+
+a.click();
+
+a.remove();
+
+URL.revokeObjectURL(url);
+
+status.textContent=
+"ZIP Downloaded ✓";
+
+setTimeout(()=>{
+status.textContent="Live ✓";
+},1500);
+
+}
+
+
+/* =========================
+   START
+========================= */
+
+loadCode();
+
+runCode();
+
+html.addEventListener("input",runCode);
+css.addEventListener("input",runCode);
+js.addEventListener("input",runCode);
+
+</script>
+
+</body>
+</html>
